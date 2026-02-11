@@ -1,0 +1,19 @@
+diffusers>=0.33.0
+accelerate
+dotenv
+bitsandbytes
+huggingface_hub
+imageio
+imageio-ffmpeg
+minio
+peft
+Pillow
+r2client
+safetensors
+scipy
+torch
+torchvision
+tqdm
+transformers
+# --only-binary=xformers
+# xformers

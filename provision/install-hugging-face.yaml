@@ -1,0 +1,94 @@
+---
+- name: Deploy Windows Seat Reflection Models
+  become: yes
+  hosts: all
+  handlers:
+    - name: restart ssh
+      service:
+        name: ssh
+        state: restarted
+  vars_files:
+    - secrets.yaml
+  tasks:
+    - name: Install a list of packages
+      ansible.builtin.apt:
+        update_cache: yes
+        pkg:
+        - python3-pip
+        - python3-virtualenv
+
+    - name: Create Non Root User
+      user:
+        name: rsp_user
+        shell: /bin/bash
+        create_home: yes
+        state: present
+
+    - name: Create .ssh directory for rsp_user user
+      file:
+        path: /home/rsp_user/.ssh
+        state: directory
+        mode: '0700'
+        owner: rsp_user
+        group: rsp_user
+
+    - name: Deploy SSH public key for rsp_user user
+      ansible.posix.authorized_key:
+        user: rsp_user
+        state: present
+        key: "{{ user_public_key }}"
+        manage_dir: yes
+
+    - name: Disable SSH password authentication
+      copy:
+        content: |
+          # SSH hardening configuration
+          PasswordAuthentication no
+          ChallengeResponseAuthentication no
+          PubkeyAuthentication yes
+        dest: /etc/ssh/sshd_config.d/99-disable-password-auth.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: restart ssh
+
+    - name: Copy Python Code to Remote Host
+      become_user: rsp_user
+      copy:
+        src: ../windowseat_inference.py 
+        dest: /home/rsp_user
+
+    - name: Copy Requirements File to Remote Host
+      become_user: rsp_user
+      copy:
+        src: ../requirements.txt
+        dest: /home/rsp_user
+
+    - name: Create application configuration file
+      template:
+        src: env.j2
+        dest: /home/rsp_user/.env
+        owner: rsp_user
+        group: rsp_user
+        mode: '0600'
+
+    - name: Install specified python requirements in indicated (virtualenv)
+      become_user: rsp_user
+      ansible.builtin.pip:
+        requirements: /home/rsp_user/requirements.txt
+        virtualenv: /home/rsp_user/venv
+
+    - name: Copy Sample Images
+      become_user: rsp_user
+      copy:
+        src: ../example_images
+        dest: /home/rsp_user
+
+
+    - name: Run windowseat_inference.py script in virtualenv
+      become_user: rsp_user
+      ansible.builtin.command:
+        cmd: ./venv/bin/python windowseat_inference.py
+      args:
+        chdir: /home/rsp_user
+
