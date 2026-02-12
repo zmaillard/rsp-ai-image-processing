@@ -58,6 +58,13 @@
         src: ../windowseat_inference.py 
         dest: /home/rsp_user
 
+    - name: Copy Fetch Code to Remote Host
+      become_user: rsp_user
+      copy:
+        src: ../sync.py 
+        dest: /home/rsp_user
+
+
     - name: Copy Requirements File to Remote Host
       become_user: rsp_user
       copy:

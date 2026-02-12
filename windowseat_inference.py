@@ -1,5 +1,6 @@
 # From https://github.com/huawei-bayerlab/windowseat-reflection-removal/blob/main/windowseat_inference.py
 # Modified to include login to Hugging Face Hub using HF_TOKEN
+# Modifed to change output to jpg
 # Otherwise the script is the same as the original, which can be found at the above link
 import argparse
 import functools
@@ -638,7 +639,7 @@ def save_prediction_only(
     output_dir: str,
 ) -> None:
     imageio.imwrite(
-        os.path.join(output_dir, f"{file_prefix}_windowseat_output.png"),
+        os.path.join(output_dir, f"{file_prefix}_windowseat_output.jpg"),
         pred_uint8,
         plugin="pillow",
     )
