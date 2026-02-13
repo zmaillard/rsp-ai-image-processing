@@ -2,8 +2,12 @@ name: Provision VM
 on:
   workflow_dispatch:
 jobs:
-  provision-vm:
+  provision:
     runs-on: ubuntu-latest
+    env:
+      TF_VAR_digitalocean_token: ${{ secrets.DO_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.B2_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.B2_APPLICATION_KEY }}
     steps:
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v3
@@ -16,10 +20,6 @@ jobs:
       - name: Terraform Init
         run: terraform init 
         working-directory: ./terraform
-        env:
-          TF_VAR_digitalocean_token: ${{ secrets.DO_TOKEN }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.B2_KEY_ID }} 
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.B2_APPLICATION_KEY }} 
 
       - name: Terraform Validate
         run: terraform validate
@@ -28,15 +28,7 @@ jobs:
       - name: Terraform Plan
         run: terraform plan
         working-directory: ./terraform
-        env:
-          TF_VAR_digitalocean_token: ${{ secrets.DO_TOKEN }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.B2_KEY_ID }} 
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.B2_APPLICATION_KEY }} 
 
       - name: Terraform Apply
         run: terraform apply 
         working-directory: ./terraform
-        env:
-          TF_VAR_digitalocean_token: ${{ secrets.DO_TOKEN }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.B2_KEY_ID }} 
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.B2_APPLICATION_KEY }} 

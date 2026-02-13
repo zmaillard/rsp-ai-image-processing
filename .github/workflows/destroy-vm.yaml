@@ -2,7 +2,7 @@ name: Destroy VM
 on:
   workflow_dispatch:
 jobs:
-  version:
+  destroy:
     runs-on: ubuntu-latest
     env:
       TF_VAR_digitalocean_token: ${{ secrets.DO_TOKEN }}
