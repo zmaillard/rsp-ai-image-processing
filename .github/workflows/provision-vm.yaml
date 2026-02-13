@@ -15,15 +15,20 @@ jobs:
       - name: Terraform fmt
         run: terraform fmt -check
         continue-on-error: true
+        working-directory: ./terraform
 
       - name: Terraform Init
         run: terraform init 
+        working-directory: ./terraform
 
       - name: Terraform Validate
         run: terraform validate -no-color
+        working-directory: ./terraform
 
       - name: Terraform Plan
-        run: terraform plan -no-color 
+        run: terraform plan -no-color
+        working-directory: ./terraform
 
       - name: Terraform Apply
         run: terraform apply 
+        working-directory: ./terraform
