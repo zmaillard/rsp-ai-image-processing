@@ -1,8 +1,9 @@
 import os
-import dotenv
 import argparse
 from minio import Minio
 
+import dotenv
+dotenv.load_dotenv()
 
 BUCKET_NAME = "sign"
 CUR_DIR = os.path.dirname(os.path.abspath(__file__))
