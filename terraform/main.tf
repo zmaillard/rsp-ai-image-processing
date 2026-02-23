@@ -6,17 +6,3 @@ resource "digitalocean_droplet" "rsp_image_processing" {
   ssh_keys = [data.digitalocean_ssh_key.terraform.id]
 }
 
-resource "null_resource" "wait_for_droplet" {
-  depends_on = [digitalocean_droplet.rsp_image_processing]
-
-  provisioner "remote-exec" {
-    inline = ["echo 'Droplet is ready'"]
-    connection {
-      type        = "ssh"
-      user        = "root"
-      host        = digitalocean_droplet.rsp_image_processing.ipv4_address
-      private_key = file(var.ssh_private_key_path)
-    }
-  }
-}
-
