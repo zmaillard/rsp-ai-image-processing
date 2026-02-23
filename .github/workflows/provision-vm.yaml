@@ -45,25 +45,24 @@ jobs:
         run: |
           echo IP_ADDR=`terraform output -json | jq '.droplet_ip.value' -r` >> $GITHUB_OUTPUT
         working-directory: ./terraform
-  provision:
-    runs-on: ubuntu-latest
-    needs: infrastructure
-    steps:
-      - uses: actions/checkout@v3
-      - name: Setup SSH key
+
+      - name: Add SSH key
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-          echo "${{ secrets.PRIVATE_KEY }}" > ./terraform/ssh_key
-          chmod 600 ./terraform/ssh_key
-      
+          mkdir -p /home/runner/.ssh
+          echo "${{ secrets.EC2_PRIVATE_KEY }}" > /home/runner/.ssh/id_rsa
+          echo "${{ secrets.PRIVATE_KEY }}" > /home/runner/.ssh/id_rsa
+          chmod 600 /home/runner/.ssh/id_rsa
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null	
+          ssh-add /home/runner/.ssh/id_rsa
 
       - name: Run playbook
         uses: dawidd6/action-ansible-playbook@v7
         with:
           playbook: install-hugging-face.yaml
           directory: ./provision
-          key: ${{secrets.PRIVATE_KEY}}
-          # Optional, literal inventory file contents
-          inventory: |
-            [all]
-            ${{ needs.infrastructure.outputs.droplet_ip }}
           vault_password: ${{secrets.ANSIBLE_VAULT_SECRET }}
+          options: |
+            --inventory inventory
+            --verbose
