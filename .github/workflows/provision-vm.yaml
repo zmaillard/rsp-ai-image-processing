@@ -14,7 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v3
-      - bash: |
+      - name: Setup SSH key
+        run: |
           echo "${{ secrets.PRIVATE_KEY }}" > ./terraform/ssh_key
           chmod 600 ./terraform/ssh_key
 
@@ -49,7 +50,8 @@ jobs:
     needs: infrastructure
     steps:
       - uses: actions/checkout@v3
-      - bash: |
+      - name: Setup SSH key
+        run: |
           echo "${{ secrets.PRIVATE_KEY }}" > ./terraform/ssh_key
           chmod 600 ./terraform/ssh_key
       
