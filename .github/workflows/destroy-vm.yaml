@@ -12,6 +12,11 @@ jobs:
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v3
 
+      - name: Setup SSH key
+        run: |
+          echo "${{ secrets.PRIVATE_KEY }}" > ./terraform/ssh_key
+          chmod 600 ./terraform/ssh_key
+
       - name: Terraform fmt
         run: terraform fmt -check
         continue-on-error: true

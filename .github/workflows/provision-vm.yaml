@@ -2,15 +2,34 @@ name: Provision VM
 on:
   workflow_dispatch:
 jobs:
-  provision:
+  infrastructure:
+    outputs:
+      droplet_ip: ${{ steps.dropletIP.outputs.IP_ADDR }}
     runs-on: ubuntu-latest
     env:
       TF_VAR_digitalocean_token: ${{ secrets.DO_TOKEN }}
+      TF_VAR_ssh_private_key_path: ./terraform/ssh_key
       AWS_ACCESS_KEY_ID: ${{ secrets.B2_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.B2_APPLICATION_KEY }}
     steps:
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v3
+
+      - name: Setup SSH key
+        run: |
+          echo "${{ secrets.PRIVATE_KEY }}" > ./terraform/ssh_key
+          chmod 600 ./terraform/ssh_key
+
+      - name: Add SSH key
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          mkdir -p /home/runner/.ssh
+          echo "${{ secrets.PRIVATE_KEY }}" > /home/runner/.ssh/id_rsa
+          chmod 600 /home/runner/.ssh/id_rsa
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null	
+          ssh-add /home/runner/.ssh/id_rsa
+
 
       - name: Terraform fmt
         run: terraform fmt -check
@@ -32,3 +51,19 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve
         working-directory: ./terraform
+
+      - name: Get Droplet IP
+        id: dropletIP
+        run: |
+          echo IP_ADDR=`terraform output -json | jq '.droplet_ip.value' -r` >> $GITHUB_OUTPUT
+        working-directory: ./terraform
+
+      - name: Run playbook
+        uses: dawidd6/action-ansible-playbook@v7
+        with:
+          playbook: install-hugging-face.yaml
+          directory: ./provision
+          vault_password: ${{secrets.ANSIBLE_VAULT_SECRET }}
+          options: |
+            --inventory ../terraform/inventory
+            --verbose
