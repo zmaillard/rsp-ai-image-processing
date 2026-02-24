@@ -14,10 +14,22 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v3
+
       - name: Setup SSH key
         run: |
           echo "${{ secrets.PRIVATE_KEY }}" > ./terraform/ssh_key
           chmod 600 ./terraform/ssh_key
+
+      - name: Add SSH key
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          mkdir -p /home/runner/.ssh
+          echo "${{ secrets.PRIVATE_KEY }}" > /home/runner/.ssh/id_rsa
+          chmod 600 /home/runner/.ssh/id_rsa
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null	
+          ssh-add /home/runner/.ssh/id_rsa
+
 
       - name: Terraform fmt
         run: terraform fmt -check
@@ -45,16 +57,6 @@ jobs:
         run: |
           echo IP_ADDR=`terraform output -json | jq '.droplet_ip.value' -r` >> $GITHUB_OUTPUT
         working-directory: ./terraform
-
-      - name: Add SSH key
-        env:
-          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-        run: |
-          mkdir -p /home/runner/.ssh
-          echo "${{ secrets.PRIVATE_KEY }}" > /home/runner/.ssh/id_rsa
-          chmod 600 /home/runner/.ssh/id_rsa
-          ssh-agent -a $SSH_AUTH_SOCK > /dev/null	
-          ssh-add /home/runner/.ssh/id_rsa
 
       - name: Run playbook
         uses: dawidd6/action-ansible-playbook@v7
