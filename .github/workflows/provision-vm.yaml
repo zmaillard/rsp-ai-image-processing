@@ -63,5 +63,5 @@ jobs:
           directory: ./provision
           vault_password: ${{secrets.ANSIBLE_VAULT_SECRET }}
           options: |
-            --inventory ./terraform/inventory
+            --inventory ../terraform/inventory
             --verbose
