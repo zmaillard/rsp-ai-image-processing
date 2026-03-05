@@ -1,8 +1,8 @@
 resource "digitalocean_droplet" "rsp_image_processing" {
   image    = "gpu-h100x1-base"
   name     = "rsp-image-processing"
-  region   = "tor1"
-  size     = "gpu-h100x1-80gb"
+  region   = var.region
+  size     = var.size
   ssh_keys = [data.digitalocean_ssh_key.terraform.id]
 }
 

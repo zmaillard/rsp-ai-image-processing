@@ -1,11 +1,22 @@
 name: Destroy VM
 on:
   workflow_dispatch:
+    inputs:
+      region:
+        description: 'DigitalOcean region for the droplet'
+        required: true
+        default: 'nyc3'
+      size:
+        description: 'Droplet size'
+        required: true
+        default: 's-1vcpu-1gb'
 jobs:
   destroy:
     runs-on: ubuntu-latest
     env:
       TF_VAR_digitalocean_token: ${{ secrets.DO_TOKEN }}
+      TF_VAR_size: ${{ inputs.size }} 
+      TF_VAR_region: ${{ inputs.region }} 
       AWS_ACCESS_KEY_ID: ${{ secrets.B2_KEY_ID }} 
       AWS_SECRET_ACCESS_KEY: ${{ secrets.B2_APPLICATION_KEY }} 
     steps:
