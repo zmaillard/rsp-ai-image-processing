@@ -1,5 +1,5 @@
 # Use Runpod PyTorch base image
-FROM runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404
+FROM --platform=linux/amd64 runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404
 
 # Set environment variables
 # This ensures Python output is immediately visible in logs
